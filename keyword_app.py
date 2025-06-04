@@ -22,11 +22,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s: %(m
 def get_db_connection():
     try:
         conn = mysql.connector.connect(
-            host="localhost",
+            host="",
             user="root",
             password="",
             charset="utf8",
-            database="youtube_search_app"
+            database=""
         )
         conn.autocommit = True
         if conn.is_connected():
