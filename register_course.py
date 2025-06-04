@@ -23,7 +23,7 @@ def get_db_connection():
               # ✅ You are using port 3307 (phpMyAdmin confirms this)
         user="root",
         password="",
-        database="youtube_search_app",
+        database="",
         cursorclass=pymysql.cursors.DictCursor,
         charset="utf8",
         autocommit=True
