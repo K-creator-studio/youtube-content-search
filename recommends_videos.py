@@ -18,7 +18,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',
     'password': '',
-    'database': 'youtube_search_app'
+    'database': ''
 }
 
 # Helper function to fetch the latest 5 search queries from the correct table
