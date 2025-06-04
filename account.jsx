@@ -1,163 +1,210 @@
-// Account.jsx
-
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { toast, ToastContainer } from "react-toastify";
-import Confetti from "react-confetti";
+// components/AccountTabs.jsx
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { motion } from "framer-motion";
 
-export default function Account() {
-  const [studentInfo, setStudentInfo] = useState({
-    name: "",
-    department: "",
+const AccountTabs = () => {
+  const [activeTab, setActiveTab] = useState("personal");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
+    phone: "",
+    bio: "",
+    degree: "",
+    experience: "",
+    research: "",
   });
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [formState, setFormState] = useState({
-    name: "",
-    department: "",
-    email: "",
-  });
-  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    const storedStudent = JSON.parse(localStorage.getItem("studentInfo"));
-    if (storedStudent) {
-      setStudentInfo({
-        ...storedStudent,
-        email: storedStudent.email || "student@example.com",
-      });
-      setFormState({
-        name: storedStudent.name || "",
-        department: storedStudent.department || "",
-        email: storedStudent.email || "student@example.com",
-      });
-    }
-    setTimeout(() => setLoading(false), 200);
+    const saved = JSON.parse(localStorage.getItem("facultyProfile"));
+    if (saved) setFormData(saved);
   }, []);
 
+  useEffect(() => {
+    if (formData.firstName || formData.department) {
+      localStorage.setItem(
+        "facultyName",
+        `${formData.firstName} ${formData.lastName}`
+      );
+      localStorage.setItem("facultyDept", formData.degree || "Department");
+    }
+  }, [formData]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSave = () => {
-    setStudentInfo(formState);
-    localStorage.setItem("studentInfo", JSON.stringify(formState));
-    setEditing(false);
-    toast.success("🎉 Profile updated successfully!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: {
-        backgroundColor: "#c0e8eb",
-        color: "#12474b",
-        fontWeight: "bold",
-      },
-      progressStyle: {
-        background: "#2cb1bc",
-      },
-    });
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
+    localStorage.setItem("facultyProfile", JSON.stringify(formData));
+    toast.success("Changes saved successfully!");
   };
-
-  const handleCancel = () => {
-    setFormState(studentInfo);
-    setEditing(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[80vh]">
-        <div className="w-16 h-16 border-4 border-t-4 border-[#2cb1bc] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="px-6 md:px-10 py-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white dark:bg-[#0e4d4f] p-6 rounded-xl shadow-lg"
     >
-      {showConfetti && (
-        <Confetti numberOfPieces={500} recycle={true} gravity={0.5} />
+      <div className="flex gap-4 mb-6 border-b pb-2">
+        {[
+          ["personal", "Personal Info"],
+          ["academic", "Academic"],
+          ["settings", "Settings"],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            className={`$${
+              activeTab === key
+                ? "font-bold border-b-2 border-[#2cb1bc] text-[#2cb1bc]"
+                : "text-gray-600"
+            } px-2 transition-colors duration-200`}
+            onClick={() => setActiveTab(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "personal" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4"
+        >
+          <h2 className="text-2xl font-semibold">Personal Information</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <input
+              name="firstName"
+              placeholder="First name"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+            />
+            <input
+              name="lastName"
+              placeholder="Last name"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+            />
+            <input
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+            />
+            <input
+              name="phone"
+              placeholder="Phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+            />
+          </div>
+          <textarea
+            name="bio"
+            placeholder="Bio"
+            value={formData.bio}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <button
+            onClick={handleSave}
+            className="bg-[#2cb1bc] hover:bg-[#239ba1] transition text-white py-2 px-6 rounded-lg shadow-md"
+          >
+            Save Changes
+          </button>
+        </motion.div>
       )}
-      <ToastContainer />
-      <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold mb-2">Account Details</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 italic">
-          Manage and view your profile information
-        </p>
-      </div>
 
-      <div className="max-w-2xl mx-auto bg-[#c0e8eb] dark:bg-[#276c71] p-8 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Student Profile</h2>
-        <div className="flex flex-col gap-4">
-          {["name", "department", "email"].map((field) => (
-            <div key={field} className="flex justify-between items-center">
-              <span className="font-semibold capitalize">{field}:</span>
-              {editing ? (
-                <input
-                  type="text"
-                  value={formState[field]}
-                  onChange={(e) =>
-                    setFormState({ ...formState, [field]: e.target.value })
-                  }
-                  className="ml-2 p-1 rounded border border-[#add1d4] w-1/2 bg-[#c0e8eb] text-teal-950"
-                />
-              ) : (
-                <span>{studentInfo[field] || "N/A"}</span>
-              )}
-            </div>
-          ))}
-          <div className="flex justify-between">
-            <span className="font-semibold">Account Created:</span>
-            <span>January 2025 (Mock)</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Last Login:</span>
-            <span>Today</span>
-          </div>
-        </div>
+      {activeTab === "academic" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4"
+        >
+          <h2 className="text-2xl font-semibold">Academic Information</h2>
+          <input
+            name="degree"
+            placeholder="Highest Degree"
+            value={formData.degree}
+            onChange={handleChange}
+            className="p-3 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <textarea
+            name="experience"
+            placeholder="Experience & Teaching Summary"
+            value={formData.experience}
+            onChange={handleChange}
+            className="p-3 border rounded-lg w-full h-24 focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <input
+            name="research"
+            placeholder="Research Interests"
+            value={formData.research}
+            onChange={handleChange}
+            className="p-3 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <button
+            onClick={handleSave}
+            className="bg-[#2cb1bc] hover:bg-[#239ba1] transition text-white py-2 px-6 rounded-lg shadow-md"
+          >
+            Save Changes
+          </button>
+        </motion.div>
+      )}
 
-        <div className="flex justify-center gap-4 mt-10">
-          {editing ? (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                onClick={handleSave}
-                className="px-6 py-2 bg-[#1b4c4f] hover:bg-[#236166] text-[#d4e2e3] rounded-full shadow-md hover:shadow-lg transform transition-all duration-300"
-              >
-                Save Changes
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                onClick={handleCancel}
-                className="px-6 py-2 bg-[#1b4c4f] hover:bg-[#236166] text-[#d4e2e3] rounded-full shadow-md hover:shadow-lg transform transition-all duration-300"
-              >
-                Cancel
-              </motion.button>
-            </>
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              onClick={() => setEditing(true)}
-              className="px-6 py-2 bg-[#1b4c4f] hover:bg-[#236166] text-[#d4e2e3] rounded-full shadow-md hover:shadow-lg transform transition-all duration-300"
-            >
-              Edit Profile
-            </motion.button>
-          )}
-        </div>
-      </div>
+      {activeTab === "settings" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4"
+        >
+          <h2 className="text-2xl font-semibold">Account Settings</h2>
+          <input
+            placeholder="Current password"
+            type="password"
+            className="p-3 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <input
+            placeholder="New password"
+            type="password"
+            className="p-3 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <input
+            placeholder="Confirm password"
+            type="password"
+            className="p-3 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2cb1bc] shadow-sm"
+          />
+          <div className="flex items-center gap-4">
+            <label>Email Notifications</label>
+            <button className="bg-[#2cb1bc] text-white py-1 px-4 rounded shadow">
+              Toggle
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <label>Student Messages</label>
+            <button className="bg-[#2cb1bc] text-white py-1 px-4 rounded shadow">
+              Toggle
+            </button>
+          </div>
+          <button
+            onClick={handleSave}
+            className="bg-[#2cb1bc] hover:bg-[#239ba1] transition text-white py-2 px-6 rounded-lg shadow-md"
+          >
+            Save Changes
+          </button>
+        </motion.div>
+      )}
     </motion.div>
   );
-}
+};
+
+export default AccountTabs;
